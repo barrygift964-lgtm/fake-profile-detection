@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Detection & Prediction{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="row-between"><h2>Detect Profile</h2><a class="link" href="{{ url_for('history') }}">View detection history &rarr;</a></div>
+  <p class="muted">Enter the profile and behavioural features of the X account, then click Detect.</p>
+  <form method="post" id="detect-form" novalidate>
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="grid3">
+      <div><label>Account name (optional)</label>
+        <input class="field sm" name="account_name" value="{{ values.get('account_name', '') }}" placeholder="@username">
+        {% if errors.account_name %}<small class="err">{{ errors.account_name }}</small>{% endif %}</div>
+      {% for f in features %}
+      <div><label>{{ f }}</label>
+        <input class="field sm" name="{{ f }}" type="number" min="0" {% if f in int_features %}step="1"{% else %}step="any"{% endif %}
+               {% if f == 'URLratio' %}max="1"{% endif %} value="{{ values.get(f, '') }}" required>
+        {% if errors[f] %}<small class="err">{{ errors[f] }}</small>{% endif %}</div>
+      {% endfor %}
+      <div class="actions">
+        <div class="sample-btns"><span class="muted">Try a sample:</span>
+          <button type="button" class="chip" onclick="fill('fake')">Fake-like</button>
+          <button type="button" class="chip" onclick="fill('genuine')">Genuine-like</button></div>
+        <button type="button" class="btn outline" onclick="clearForm()">Clear</button>
+        <button type="submit" class="btn">Detect</button>
+      </div>
+    </div>
+  </form>
+  {% if result %}
+  <div class="result {{ 'fake' if result.label == 'Fake' else 'genuine' }}">
+    <small>RESULT</small>
+    <h3>{{ result.name }} is a {{ result.label|upper }} PROFILE</h3>
+    <p>Confidence: {{ '%.0f'|format(result.confidence) }}% &nbsp;|&nbsp; Trees voting {{ result.label }}: {{ result.votes }} of {{ result.trees }} &nbsp;|&nbsp; Model: Random Forest</p>
+  </div>
+  {% endif %}
+</section>
+<script>
+const samples = {
+  fake: {account_name:'@daily_promo_24', statuses_count:35, followers_count:1, friends_count:2001, favourites_count:0, listed_count:0,
+         FFratio:0.0005, URLratio:0.92, average_mentions:0.04, average_hashtags:0.12, average_favorites:0.01, average_retweet:0.85, average_reply:0.01},
+  genuine: {account_name:'@ada_okoro', statuses_count:4210, followers_count:612, friends_count:498, favourites_count:1880, listed_count:14,
+         FFratio:1.229, URLratio:0.18, average_mentions:0.71, average_hashtags:0.66, average_favorites:0.85, average_retweet:0.20, average_reply:0.42}};
+function fill(k){ for (const [n,v] of Object.entries(samples[k])) document.querySelector(`[name="${n}"]`).value = v; }
+function clearForm(){ document.querySelectorAll('#detect-form input:not([type=hidden])').forEach(i => i.value=''); }
+</script>
+{% endblock %}

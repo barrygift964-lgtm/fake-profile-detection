@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="split">
+  {% include '_hero.html' %}
+  <form class="split-form" method="post" autocomplete="on">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <p class="small-label">Welcome back</p>
+    <h1>Login</h1>
+    <input class="field" type="email" name="email" placeholder="Email Address" required>
+    <div class="pw"><input class="field" type="password" name="password" placeholder="Password" required>
+      <button type="button" class="eye" onclick="togglePw(this)" aria-label="Show password">&#128065;</button></div>
+    <div class="row-between">
+      <label class="check"><input type="checkbox" name="keep_signed_in"> Keep me signed in</label>
+      <span class="muted" title="Contact the administrator to reset your password">Forgot password?</span>
+    </div>
+    <button class="btn wide" type="submit">Login</button>
+    <p class="center muted">Don't have an account? <a class="strong" href="{{ url_for('register') }}">Register</a></p>
+  </form>
+</section>
+<script>function togglePw(b){const i=b.previousElementSibling;i.type=i.type==='password'?'text':'password';}</script>
+{% endblock %}

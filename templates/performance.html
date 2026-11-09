@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Performance analysis{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="row-between"><h2>Performance Analysis</h2>
+    {% if user.role == 'admin' %}<a class="link" href="{{ url_for('users') }}">Manage users &rarr;</a>{% endif %}</div>
+  {% if m %}
+  <p class="muted">Random Forest model ({{ m.n_estimators }} trees) &nbsp;|&nbsp; dataset: {{ ds.file_name if ds else '-' }}
+     ({{ '{:,}'.format(m.train_size + m.test_size) }} profiles) &nbsp;|&nbsp; training 80% ({{ '{:,}'.format(m.train_size) }})
+     &nbsp;|&nbsp; testing 20% ({{ '{:,}'.format(m.test_size) }}) &nbsp;|&nbsp; trained {{ m.trained_on }}</p>
+  <div class="cards">
+    <div class="card"><span>Accuracy</span><b>{{ '%.2f'|format(m.accuracy) }}%</b></div>
+    <div class="card"><span>Precision</span><b>{{ '%.2f'|format(m.precision_score) }}%</b></div>
+    <div class="card"><span>Recall</span><b>{{ '%.2f'|format(m.recall_score) }}%</b></div>
+    <div class="card"><span>F1-score</span><b>{{ '%.2f'|format(m.f1_score) }}%</b></div>
+    <div class="card"><span>Error rate</span><b>{{ '%.2f'|format(m.error_rate) }}%</b></div>
+  </div>
+  <div class="dash-grid">
+    <div class="box">
+      <h4>Confusion Matrix (test set)</h4>
+      <table class="cm">
+        <tr><th></th><th>Predicted Fake</th><th>Predicted Genuine</th></tr>
+        <tr><th>Actual Fake</th><td class="shade">TP<br><b>{{ m.tp }}</b></td><td>FN<br><b>{{ m.fn }}</b></td></tr>
+        <tr><th>Actual Genuine</th><td>FP<br><b>{{ m.fp }}</b></td><td class="shade">TN<br><b>{{ m.tn }}</b></td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h4>Proposed vs Existing System</h4>
+      <img src="{{ url_for('static', filename='media/charts/comparison.png') }}?v={{ m.model_id }}" alt="Comparison chart">
+      <p class="muted small">{{ existing.name }}: accuracy {{ existing.accuracy }}%, error rate {{ '%.2f'|format(100 - existing.accuracy) }}%</p>
+    </div>
+    <div class="box">
+      <h4>Feature Importance</h4>
+      <img src="{{ url_for('static', filename='media/charts/importance.png') }}?v={{ m.model_id }}" alt="Feature importance chart">
+    </div>
+    <div class="box">
+      <h4>Detections Made</h4>
+      {% set total = stats.total or 0 %}{% set fake = stats.fake or 0 %}
+      {% set pct = (fake / total * 100) if total else 0 %}
+      <div class="donut-wrap">
+        <div class="donut" style="--p: {{ pct }}"><span>{{ total }}<small>checked</small></span></div>
+        <ul class="legend"><li><i class="dk"></i>Fake: {{ fake }}</li><li><i class="lt"></i>Genuine: {{ stats.genuine or 0 }}</li><li class="muted">Registered users: {{ users }}</li></ul>
+      </div>
+      <h4 class="mt">Recent Detections</h4>
+      {% if recent %}
+      <table class="table compact">
+        {% for r in recent %}<tr><td>{{ r.account_name or 'Unnamed' }}</td><td><span class="tag {{ r.predicted_label|lower }}">{{ r.predicted_label }}</span></td><td>{{ '%.0f'|format(r.confidence) }}%</td></tr>{% endfor %}
+      </table>
+      {% else %}<p class="muted small">No detections yet.</p>{% endif %}
+    </div>
+  </div>
+  {% else %}
+  <p>No trained model yet. The administrator should open <a class="link" href="{{ url_for('upload') }}">Upload</a>, upload a dataset and click Train|Test.</p>
+  {% endif %}
+</section>
+{% endblock %}

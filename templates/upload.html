@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Upload{% endblock %}
+{% block content %}
+<section class="panel upload">
+  <form method="post" enctype="multipart/form-data" class="center">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="browse-row">
+      <label class="btn big">Browse
+        <input type="file" name="dataset" accept=".csv" hidden
+               onchange="document.getElementById('fname').textContent=this.files[0]?this.files[0].name:'No file uploaded'">
+      </label>
+      <span id="fname" class="fname">{{ latest.file_name if latest else 'No file uploaded' }}</span>
+    </div>
+    <button class="btn outline big" type="submit">Upload</button>
+  </form>
+  {% if latest %}
+  <p class="center info">Current dataset: <b>{{ latest.file_name }}</b> &mdash; {{ '{:,}'.format(latest.total_records) }} records
+     ({{ '{:,}'.format(latest.genuine_count) }} genuine, {{ '{:,}'.format(latest.fake_count) }} fake), uploaded {{ latest.uploaded_on }}</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('train') }}" class="center train-form">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="muted">Number of trees <input class="mini" type="number" name="n_trees" value="100" min="10" max="500"></label>
+    <button class="btn wide-half" type="submit">Train|Test</button>
+  </form>
+  {% if model %}<p class="center muted">Active model trained {{ model.trained_on }} &middot; {{ model.train_size }} training / {{ model.test_size }} testing records &middot; accuracy {{ '%.2f'|format(model.accuracy) }}%</p>{% endif %}
+  <details class="hint-box"><summary>Required CSV columns</summary>
+    <p>statuses_count, followers_count, friends_count, favourites_count, listed_count, FFratio, URLratio,
+       average_mentions, average_hashtags, average_favorites, average_retweet, average_reply, and
+       <b>label</b> (1 = fake, 0 = genuine). FFratio is calculated automatically if it is missing.</p></details>
+</section>
+{% endblock %}

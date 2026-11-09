@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="split">
+  {% include '_hero.html' %}
+  <div class="split-form">
+    <p class="small-label">Welcome to</p>
+    <h1>Fake Profile<br>Detection System</h1>
+    <p class="lead">Detect fake accounts on the X (Twitter) platform using a Random Forest
+      machine learning model trained on twelve profile and behavioural features of each account.</p>
+    <ol class="steps">
+      <li><span>1</span>Upload a labelled dataset</li>
+      <li><span>2</span>Train and test the model</li>
+      <li><span>3</span>Detect fake or genuine profiles</li>
+      <li><span>4</span>View performance analysis</li>
+    </ol>
+    {% if model %}<p class="muted">Active model: Random Forest ({{ model.n_estimators }} trees), accuracy {{ '%.2f'|format(model.accuracy) }}%</p>{% endif %}
+    <a class="btn" href="{{ url_for('dashboard') if user else url_for('login') }}">Get Started</a>
+  </div>
+</section>
+{% endblock %}

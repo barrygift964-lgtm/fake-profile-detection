@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Manage users{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="row-between"><h2>Manage Users</h2><a class="link" href="{{ url_for('dashboard') }}">&larr; Back to Performance analysis</a></div>
+  <table class="table">
+    <tr><th>#</th><th>Full name</th><th>Email</th><th>Role</th><th>Status</th><th>Detections</th><th>Joined</th><th>Actions</th></tr>
+    {% for r in rows %}
+    <tr><td>{{ r.user_id }}</td><td>{{ r.full_name }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td>
+      <td>{{ 'Locked' if r.failed_logins >= 5 else ('Active' if r.is_active else 'Disabled') }}</td><td>{{ r.detections }}</td><td>{{ r.date_joined }}</td>
+      <td>{% if r.user_id != user.user_id %}
+        <form method="post" class="inline"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="user_id" value="{{ r.user_id }}">
+          <button class="chip" name="action" value="toggle">{{ 'Disable' if r.is_active and r.failed_logins < 5 else 'Enable' }}</button>
+          <button class="chip" name="action" value="role">{{ 'Make user' if r.role == 'admin' else 'Make admin' }}</button></form>
+      {% else %}<span class="muted">You</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

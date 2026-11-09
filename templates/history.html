@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Detection history{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="row-between"><h2>Detection History</h2><a class="link" href="{{ url_for('detect') }}">&larr; Back to Detect Profile</a></div>
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <tr><th>#</th><th>Date</th><th>Checked by</th><th>Account</th><th>Followers</th><th>Friends</th><th>FFratio</th><th>URLratio</th><th>Result</th><th>Confidence</th></tr>
+    {% for r in rows %}
+    <tr><td>{{ r.detection_id }}</td><td>{{ r.detected_on }}</td><td>{{ r.full_name }}</td><td>{{ r.account_name or '-' }}</td>
+        <td>{{ r.followers_count }}</td><td>{{ r.friends_count }}</td><td>{{ '%.3f'|format(r.ff_ratio) }}</td><td>{{ '%.2f'|format(r.url_ratio) }}</td>
+        <td><span class="tag {{ r.predicted_label|lower }}">{{ r.predicted_label }}</span></td><td>{{ '%.0f'|format(r.confidence) }}%</td></tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">No detections yet.</p>{% endif %}
+</section>
+{% endblock %}
